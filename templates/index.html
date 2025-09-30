@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Risk Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #f8fbfd);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Single header with logo, navigation, and user profile */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #ffffffcc;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            background: #0a3d91;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            color: #0a3d91;
+            font-size: 1.1rem;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            font-weight: 600;
+            color: #0a3d91;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: #0a3d9130;
+            color: #062c68;
+        }
+
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f0f5ff;
+            color: #0a3d91;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .user-name:hover {
+            background: #e0ebff;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            min-width: 150px;
+            display: none;
+            z-index: 101;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown button {
+            width: 100%;
+            text-align: left;
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown button:hover {
+            background: #f5f8ff;
+        }
+
+        .container {
+            margin-top: 80px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .container.active {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Home */
+        .hero {
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #0a3d91;
+        }
+
+        .hero p {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .hero button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            background: linear-gradient(to right, #0a3d91, #357ab8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(10, 61, 145, 0.3);
+            transition: all 0.3s;
+            z-index: 1;
+        }
+
+        .hero button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent);
+            transition: 0.9s;
+            z-index: -1;
+        }
+
+        .hero button:hover::before {
+            left: 100%;
+        }
+
+        .hero button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right,
+                    rgba(255, 255, 255, 0.15) 0%,
+                    rgba(255, 255, 255, 0.05) 50%,
+                    transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .info-panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .panel {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #0a3d91;
+        }
+
+        .panel p {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        /* Form Styling */
+        .form-wrapper {
+            background: linear-gradient(145deg, #ffffff, #f0f5ff);
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(10, 61, 145, 0.2);
+            text-align: center;
+            border: 1px solid #d0d7e3;
+        }
+
+        .form-wrapper h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #0a3d91;
+        }
+
+        .progress {
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 16px;
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0a3d91, #357ab8);
+            transition: width 0.4s ease;
+        }
+
+        #question-container {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        #question-container h2 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #question-container small {
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        #answer-input {
+            width: 100%;
+            height: 60px;
+            font-size: 1.2rem;
+            padding: 10px 15px;
+            border: 1.5px solid #0a3d91;
+            border-radius: 10px;
+            background: #f9f9f9;
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid #0a3d91;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: #f9f9f9;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #062c68;
+            outline: none;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .quiz-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .quiz-buttons button {
+            flex: 1;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .next-btn {
+            background: #0a3d91;
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #062c68;
+            transform: translateY(-2px);
+        }
+
+        .prev-btn {
+            background: #d0d7e3;
+            color: #333;
+        }
+
+        .prev-btn:hover {
+            background: #a8b3c2;
+            transform: translateY(-2px);
+        }
+
+        /* Result Styling */
+        .result {
+            margin-top: 25px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+
+        .gauge {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gauge-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(#0a3d91 0%, #357ab8 50%, #62a0e0 100%);
+            clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 0, 50% 0);
+            transform: rotate(0deg);
+            transition: transform 1.5s ease-in-out;
+        }
+
+        .gauge-center {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 2rem;
+            color: #0a3d91;
+        }
+
+        #risk-details {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        #risk-details h4 {
+            margin-bottom: 10px;
+            color: #0a3d91;
+        }
+
+        #risk-details ul {
+            padding-left: 20px;
+        }
+
+        #risk-details li {
+            margin-bottom: 5px;
+        }
+
+        #complications-risk {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff8e1;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Tips */
+        .tips-content {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .tip-section {
+            background: #fff;
+            padding: 17px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tip-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .tip-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 7px;
+            color: #0a3d91;
+        }
+
+        .tip-section p {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        /* Progress Section */
+        .progress-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .clear-history {
+            background: #0f259c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .clear-history:hover {
+            background: #225fb5;
+        }
+
+        #progress-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+        }
+
+        .no-results p {
+            margin-bottom: 20px;
+        }
+
+        .no-results button {
+            background: #0a3d91;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .no-results button:hover {
+            background: #062c68;
+        }
+
+        #progress-list li {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-left: 5px solid #0a3d91;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #progress-list li:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .progress-risk-value {
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .progress-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .progress-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .factor-tag {
+            background: #e3f2fd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #0a3d91;
+        }
+
+        .full-details {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .low {
+            border-left-color: #0fc915;
+        }
+
+        .low .progress-risk-value {
+            background: #e8f5e9;
+            color: #0ba525;
+        }
+
+        .medium {
+            border-left-color: #edd93b;
+        }
+
+        .medium .progress-risk-value {
+            background: #fff8e1;
+            color: #c77323;
+        }
+
+        .high {
+            border-left-color: #dc2417;
+        }
+
+        .high .progress-risk-value {
+            background: #ffebee;
+            color: #d11212;
+        }
+
+        /* About Us */
+        #about-page {
+            align-items: flex-start;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin-top: 80px;
+        }
+
+        .about-content {
+            max-width: none;
+            width: 100%;
+            padding: 10px 30px;
+            text-align: left;
+        }
+
+        .about-content h1 {
+            font-size: 1.8rem;
+            color: #0a3d91;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .about-section {
+            margin-bottom: 20px;
+        }
+
+        .about-section h2 {
+            font-size: 1.4rem;
+            color: #357ab8;
+            margin-bottom: 10px;
+        }
+
+        .about-section h3 {
+            font-size: 1.2rem;
+            color: #0a3d91;
+            margin-bottom: 6px;
+        }
+
+        .about-section p {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .about-section ul {
+            padding-left: 16px;
+            margin-bottom: 10px;
+        }
+
+        .about-section li {
+            margin-bottom: 5px;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h4 {
+            font-size: 1.2rem;
+            color: #0a3d91;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        /* Responsive design */
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .nav-container {
+                flex-wrap: wrap;
+                margin: 10px 0;
+            }
+
+            .container {
+                margin-top: 140px;
+            }
+
+            #about-page {
+                margin-top: 140px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav-container {
+                gap: 8px;
+            }
+
+            .nav-item {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            .user-name {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            .form-wrapper {
+                padding: 20px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Single header with logo, navigation, and user profile -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-img">D</div>
+            <div class="logo-text">Diabetes Predictor</div>
+        </div>
+
+        <div class="nav-container">
+            <div class="nav-item active" onclick="showPage('home', this)">Home</div>
+            <div class="nav-item" onclick="showPage('predict', this)">Predict</div>
+            <div class="nav-item" onclick="showPage('tips', this)">Health Tips</div>
+            <div class="nav-item" onclick="showPage('progress', this)">Progress</div>
+            <div class="nav-item" onclick="showPage('about', this)">About Us</div>
+        </div>
+
+        <div class="user-profile" id="user-profile">
+            <div class="user-name">
+                <span id="username-display">Guest User</span>
+                <span>▼</span>
+            </div>
+            <div class="user-dropdown" id="user-dropdown">
+                <button onclick="logout()">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div class="container" id="login-page" style="display:none;">
+        <div class="form-wrapper">
+            <h1>Login</h1>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" style="
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(to right, #0a3d91, #357ab8);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(10, 61, 145, 0.15);
+    cursor: pointer;
+    transition: background 0.3s;
+">Login</button>
+            </form>
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+            <div id="login-error" style="color:red; margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <!-- Home -->
+    <div class="container active" id="home-page">
+        <div class="hero">
+            <h1>Welcome to Diabetes Risk Predictor</h1>
+            <p>Understand your risk early. Take charge of your health with our AI-powered assessment tool.</p>
+            <button onclick="startQuiz()">Begin Risk Check</button>
+        </div>
+        <div class="info-panels">
+            <div class="panel">
+                <h2>Symptoms</h2>
+                <p>Excessive thirst, frequent urination, fatigue, and blurred vision. Early screening helps prevent
+                    complications.</p>
+            </div>
+            <div class="panel">
+                <h2>Prevention</h2>
+                <p>Eat balanced meals, exercise regularly, manage stress, and schedule regular check-ups to keep
+                    diabetes at bay.</p>
+            </div>
+            <div class="panel">
+                <h2>AI-Powered</h2>
+                <p>Our advanced machine learning model analyzes your risk factors to provide personalized insights.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predict -->
+    <div class="container" id="predict-page">
+        <div class="form-wrapper">
+            <h1>Diabetes Risk Assessment</h1>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div id="question-container"></div>
+
+            <div class="quiz-buttons" id="quiz-buttons">
+                <button class="prev-btn" onclick="prevQuestion()" style="display:none;">Previous</button>
+                <button class="next-btn" onclick="nextQuestion()" id="next-btn">Next</button>
+            </div>
+
+            <div class="result hidden" id="result">
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <div class="gauge-fill" id="gauge-fill"></div>
+                        <div class="gauge-center" id="gauge-percent">--%</div>
+                    </div>
+                </div>
+                <h3 id="risk-text">Your diabetes risk level</h3>
+                <div id="risk-details"></div>
+                <div id="complications-risk"></div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="next-btn" onclick="showPage('home')">Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="container" id="tips-page">
+        <div class="tips-content">
+            <div class="tip-section">
+                <h2>General Tips</h2>
+                <p>Maintain a healthy weight, eat fiber-rich foods, and stay hydrated. Limit processed sugars and
+                    refined carbs.</p>
+            </div>
+            <div class="tip-section">
+                <h2>Low Risk</h2>
+                <p>Continue your healthy habits. Maintain a balanced diet, exercise regularly, and go for annual health
+                    check-ups.</p>
+            </div>
+            <div class="tip-section">
+                <h2>Medium Risk</h2>
+                <p>Improve activity levels, reduce sugar intake, and monitor glucose regularly. Consider consultation
+                    with a healthcare provider.</p>
+            </div>
+            <div class="tip-section">
+                <h2>High Risk</h2>
+                <p><strong style="padding: 13px 2px;">Seek immediate medical advice.</strong> Adopt a strict diet plan,
+                    engage in physician-approved exercises, and
+                    monitor your blood sugar closely.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="container" id="progress-page">
+        <div class="progress-container">
+            <div class="progress-header">
+                <h1>Your Previous Results</h1>
+                <button class="clear-history" onclick="clearHistory()">Clear History</button>
+            </div>
+
+            <div id="progress-list" class="progress-list">
+                <!-- This content will be dynamically populated by JS -->
+                <!-- If empty, this box will be shown via JS -->
+                <div class="no-results">
+                    <p>No tests taken yet. Complete the diabetes risk assessment to see your results here.</p>
+                    <button onclick="showPage('predict')">Take Test Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Us -->
+    <div class="container" id="about-page">
+        <div class="about-content">
+            <h1>About Us</h1>
+
+            <div class="about-section">
+                <h2>AI-Powered Diabetes Risk Predictor</h2>
+                <p>Our AI-powered Diabetes Risk Predictor is a web-based tool designed to make early diabetes risk
+                    screening more accessible. Using machine learning algorithms trained on clinical datasets, it
+                    analyzes vital parameters to provide accurate risk assessments.</p>
+            </div>
+
+            <div class="about-section">
+                <h3>How It Works</h3>
+                <p>The system analyzes your:</p>
+                <ul>
+                    <li>Glucose levels</li>
+                    <li>Body Mass Index (BMI)</li>
+                    <li>Blood pressure</li>
+                    <li>Family history</li>
+                    <li>Other key risk factors</li>
+                </ul>
+                <p>Using these inputs, our AI model calculates your personalized diabetes risk score.</p>
+            </div>
+
+            <div class="about-section">
+                <h3>Our Mission</h3>
+                <p>This project is inspired by research from the MDPI paper on <strong
+                        style="padding: 2px 5px;">"Predicting Risk and Complications of Diabetes Through Built-in
+                        Artificial Intelligence."</strong> Our goal is to empower individuals with easy-to-understand,
+                    actionable insights about their health.</p>
+            </div>
+
+            <div class="about-features">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h4>Early Detection</h4>
+                    <p>Identify diabetes risk factors before symptoms appear</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h4>Personalized Insights</h4>
+                    <p>Get customized recommendations based on your profile</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h4>Progress Tracking</h4>
+                    <p>Monitor your risk over time and see improvements</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Quiz Questions ---
+        const quizQuestions = [
+            { question: "What is your age?", type: "number", name: "age" },
+            { question: "What is your gender?", type: "select", name: "gender", options: ["Male", "Female"] },
+            { question: "What is your height (in cm)?", type: "number", name: "height" },
+            { question: "What is your weight (in kg)?", type: "number", name: "weight" },
+            { question: "What is your glucose level (mg/dL)?", type: "number", name: "glucose" },
+            { question: "What is your blood pressure (systolic/diastolic)?", type: "text", name: "bp", placeholder: "e.g., 120/80" },
+            { question: "Do you have a family history of diabetes?", type: "select", name: "family_history", options: ["No", "Yes"] },
+            { question: "How many pregnancies have you had? (if applicable)", type: "number", name: "pregnancies", conditional: "gender", conditionValue: "Female" }
+        ];
+
+        let currentQuestion = 0;
+        let quizAnswers = {};
+        let isLoggedIn = false;
+
+        // Start the quiz from home page
+        function startQuiz() {
+            currentQuestion = 0;
+            quizAnswers = {};
+            showPage('predict');
+        }
+
+        function loadQuestion() {
+            const container = document.getElementById('question-container');
+            const progressBar = document.getElementById('progress-bar');
+
+            if (currentQuestion >= quizQuestions.length) {
+                showResult();
+                return;
+            }
+
+            // Check if we should skip this question based on conditions
+            const q = quizQuestions[currentQuestion];
+            if (q.conditional && quizAnswers[q.conditional] !== q.conditionValue) {
+                currentQuestion++;
+                loadQuestion();
+                return;
+            }
+
+            let inputHtml = '';
+
+            if (q.type === "select") {
+                inputHtml = `
+                    <select id="answer-input">
+                        <option value="">Select an option</option>
+                        ${q.options.map(opt => `<option value="${opt}" ${quizAnswers[q.name] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                    </select>
+                `;
+            } else {
+                inputHtml = `<input id="answer-input" type="${q.type}" value="${quizAnswers[q.name] || ''}" placeholder="${q.placeholder || ''}" />`;
+            }
+
+            container.innerHTML = `
+                <h2>${q.question}</h2>
+                ${inputHtml}
+            `;
+
+            progressBar.style.width = ((currentQuestion + 1) / quizQuestions.length * 100) + "%";
+            document.querySelector('.prev-btn').style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+            document.getElementById('next-btn').textContent = currentQuestion === quizQuestions.length - 1 ? 'Submit' : 'Next';
+        }
+
+        function nextQuestion() {
+            const q = quizQuestions[currentQuestion];
+            const val = document.getElementById('answer-input').value;
+
+            if (!val) {
+                alert("Please enter a value.");
+                return;
+            }
+
+            quizAnswers[q.name] = val;
+
+            // Calculate BMI if we have height and weight
+            if (q.name === "weight" && quizAnswers.height && quizAnswers.weight) {
+                const heightInMeters = quizAnswers.height / 100;
+                quizAnswers.bmi = (quizAnswers.weight / (heightInMeters * heightInMeters)).toFixed(1);
+            }
+
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        async function showResult() {
+            document.getElementById('question-container').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'none';
+            document.getElementById('result').classList.remove('hidden');
+
+            // Show loading state
+            document.getElementById('gauge-percent').textContent = '...';
+            document.getElementById('risk-text').textContent = 'Calculating your risk...';
+
+            try {
+                // Send data to backend for prediction
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(quizAnswers)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get prediction');
+                }
+
+                const result = await response.json();
+
+                // Update UI with backend results
+                const riskScore = Math.round(result.probability * 100);
+                const riskLevel = result.risk;
+
+                // Update gauge
+                document.getElementById('gauge-percent').textContent = `${riskScore}%`;
+                document.getElementById('gauge-fill').style.transform = `rotate(${riskScore * 1.8}deg)`;
+
+                // Update risk text
+                document.getElementById('risk-text').textContent = `Your diabetes risk level: ${riskLevel}`;
+
+                // Update risk details
+                const riskDetails = document.getElementById('risk-details');
+                riskDetails.innerHTML = `
+                    <h4>Your Assessment Details:</h4>
+                    <p>Based on your inputs:</p>
+                    <ul>
+                        <li>Age: ${quizAnswers.age || 'Not provided'}</li>
+                        <li>Gender: ${quizAnswers.gender || 'Not provided'}</li>
+                        ${result.inputs.bmi ? `<li>BMI: ${result.inputs.bmi}</li>` : ''}
+                        <li>Glucose Level: ${quizAnswers.glucose || 'Not provided'} mg/dL</li>
+                        <li>Blood Pressure: ${quizAnswers.bp || 'Not provided'}</li>
+                        <li>Family History: ${quizAnswers.family_history || 'Not provided'}</li>
+                        ${quizAnswers.pregnancies ? `<li>Pregnancies: ${quizAnswers.pregnancies}</li>` : ''}
+                    </ul>
+                `;
+
+                // Add complications risk based on level
+                const complications = document.getElementById('complications-risk');
+                let healthNote = '';
+
+                if (riskLevel === 'High') {
+                    healthNote = 'High diabetes risk detected. Immediate medical consultation recommended.';
+                    complications.innerHTML = `
+                        <h4>⚠️ High Risk Alert</h4>
+                        <p>${healthNote}</p>
+                        <p>Your glucose levels and BMI indicate significant risk factors that require professional medical attention.</p>
+                    `;
+                } else if (riskLevel === 'Medium') {
+                    healthNote = 'Moderate diabetes risk. Lifestyle modifications recommended.';
+                    complications.innerHTML = `
+                        <h4>⚠️ Moderate Risk</h4>
+                        <p>${healthNote}</p>
+                        <p>Consider improving diet, increasing physical activity, and regular glucose monitoring.</p>
+                    `;
+                } else {
+                    healthNote = 'Low diabetes risk. Continue healthy lifestyle maintenance.';
+                    complications.innerHTML = `
+                        <h4>✅ Low Risk</h4>
+                        <p>${healthNote}</p>
+                        <p>Maintain current healthy habits with regular annual check-ups.</p>
+                    `;
+                }
+
+                // Reload progress to show the new entry
+                await loadProgress();
+
+            } catch (error) {
+                console.error('Error getting prediction:', error);
+                // Fallback to frontend calculation if backend fails
+                const riskScore = calculateRiskScore();
+                const riskLevel = getRiskLevel(riskScore);
+
+                document.getElementById('gauge-percent').textContent = `${riskScore}%`;
+                document.getElementById('gauge-fill').style.transform = `rotate(${riskScore * 1.8}deg)`;
+                document.getElementById('risk-text').textContent = `Your diabetes risk level: ${riskLevel}`;
+
+                alert('Note: Using fallback calculation. Results may vary.');
+            }
+        }
+
+        function calculateRiskScore() {
+            let score = 0;
+
+            // Age factor
+            if (quizAnswers.age >= 45) score += 25;
+            else if (quizAnswers.age >= 35) score += 15;
+            else if (quizAnswers.age >= 25) score += 5;
+
+            // BMI factor
+            if (quizAnswers.bmi) {
+                if (quizAnswers.bmi >= 30) score += 25;
+                else if (quizAnswers.bmi >= 25) score += 15;
+            }
+
+            // Glucose factor
+            if (quizAnswers.glucose >= 126) score += 30;
+            else if (quizAnswers.glucose >= 100) score += 15;
+
+            // Family history
+            if (quizAnswers.family_history === "Yes") score += 10;
+
+            // Pregnancy factor (for females)
+            if (quizAnswers.gender === "Female" && quizAnswers.pregnancies >= 3) score += 10;
+
+            return Math.min(score, 100);
+        }
+
+        function getRiskLevel(score) {
+            if (score >= 70) return 'High';
+            if (score >= 40) return 'Medium';
+            return 'Low';
+        }
+
+        async function loadProgress() {
+            const progressList = document.getElementById('progress-list');
+
+            try {
+                const response = await fetch('/api/history');
+                if (!response.ok) {
+                    throw new Error('Failed to load history');
+                }
+
+                const history = await response.json();
+
+                if (history.length === 0) {
+                    progressList.innerHTML = `
+                        <div class="no-results">
+                            <p>No tests taken yet. Complete the diabetes risk assessment to see your results here.</p>
+                            <button onclick="showPage('predict')">Take Test Now</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                progressList.innerHTML = history.map(entry => {
+                    const healthNote = getHealthNote(entry.risk, entry.bmi, entry.glucose);
+                    return `
+                    <li class="${entry.risk.toLowerCase()}">
+                        <div class="progress-item-header">
+                            <strong>${entry.date}</strong>
+                            <span class="progress-risk-value">${entry.risk_score}% - ${entry.risk} Risk</span>
+                        </div>
+                        <div class="progress-details">
+                            <p><strong>Key Metrics:</strong></p>
+                            <div class="progress-factors">
+                                <span class="factor-tag">Risk: ${entry.risk}</span>
+                                <span class="factor-tag">BMI: ${entry.bmi || 'N/A'}</span>
+                                <span class="factor-tag">Glucose: ${entry.glucose} mg/dL</span>
+                                <span class="factor-tag">Age: ${entry.age}</span>
+                            </div>
+                            <div class="full-details">
+                                <p><strong>Health Note:</strong> ${healthNote}</p>
+                                <p><strong>Details:</strong> Blood Pressure: ${entry.bp || 'N/A'}, Probability: ${(entry.probability * 100).toFixed(1)}%</p>
+                            </div>
+                        </div>
+                    </li>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading progress:', error);
+                progressList.innerHTML = `
+                    <div class="no-results">
+                        <p>Unable to load your test history. Please try again later.</p>
+                        <button onclick="showPage('predict')">Take New Test</button>
+                    </div>
+                `;
+            }
+        }
+
+        function getHealthNote(riskLevel, bmi, glucose) {
+            let note = '';
+
+            if (riskLevel === 'High') {
+                note = 'High risk - Consult healthcare provider immediately. ';
+            } else if (riskLevel === 'Medium') {
+                note = 'Moderate risk - Lifestyle changes recommended. ';
+            } else {
+                note = 'Low risk - Maintain healthy habits. ';
+            }
+
+            if (bmi >= 30) {
+                note += 'High BMI detected. ';
+            } else if (bmi >= 25) {
+                note += 'Elevated BMI. ';
+            }
+
+            if (glucose >= 126) {
+                note += 'Elevated glucose levels. ';
+            } else if (glucose >= 100) {
+                note += 'Borderline glucose levels. ';
+            }
+
+            return note || 'Continue regular health monitoring.';
+        }
+
+        async function clearHistory() {
+            if (confirm("Are you sure you want to clear your test history?")) {
+                try {
+                    const response = await fetch('/api/clear_history', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        await loadProgress();
+                    } else {
+                        throw new Error('Failed to clear history');
+                    }
+                } catch (error) {
+                    console.error('Error clearing history:', error);
+                    alert('Failed to clear history. Please try again.');
+                }
+            }
+        }
+
+        // --- Navigation ---
+        function showPage(page, el) {
+            ['home', 'predict', 'tips', 'progress', 'about', 'login'].forEach(p => {
+                const c = document.getElementById(p + '-page');
+                if (c) c.classList.remove('active');
+                if (c) c.style.display = 'none';
+            });
+            const pageEl = document.getElementById(page + '-page');
+            if (pageEl) {
+                pageEl.classList.add('active');
+                pageEl.style.display = 'flex';
+            }
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if (el) {
+                el.classList.add('active');
+            } else {
+                const navItems = document.querySelectorAll('.nav-item');
+                for (let item of navItems) {
+                    if (item.textContent.toLowerCase().includes(page)) {
+                        item.classList.add('active');
+                        break;
+                    }
+                }
+            }
+            if (page === 'predict') {
+                currentQuestion = 0;
+                quizAnswers = {};
+                document.getElementById('result').classList.add('hidden');
+                document.getElementById('quiz-buttons').style.display = 'flex';
+                loadQuestion();
+            }
+            if (page === 'progress') {
+                // Always reload progress when showing the progress page
+                loadProgress();
+            }
+        }
+
+        // --- User Dropdown Logic ---
+        function updateDropdown(loggedIn) {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.innerHTML = '';
+            if (loggedIn) {
+                const btn = document.createElement('button');
+                btn.textContent = 'Sign Out';
+                btn.onclick = function () {
+                    logout();  // This will now use POST
+                    dropdown.classList.remove('show');
+                };
+                dropdown.appendChild(btn);
+            } else {
+                const btn = document.createElement('button');
+                btn.textContent = 'Sign In';
+                btn.onclick = function () {
+                    showPage('login');
+                    dropdown.classList.remove('show');
+                };
+                dropdown.appendChild(btn);
+            }
+        }
+
+        // --- Check Login Status ---
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                if (data.logged_in) {
+                    document.getElementById('username-display').textContent = data.name;
+                    updateDropdown(true);
+                    isLoggedIn = true;
+                    showPage('home');
+
+                    // Reload progress after checking status
+                    await loadProgress();
+                } else {
+                    document.getElementById('username-display').textContent = 'Guest User';
+                    updateDropdown(false);
+                    isLoggedIn = false;
+                    showPage('login');
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                document.getElementById('username-display').textContent = 'Guest User';
+                updateDropdown(false);
+                isLoggedIn = false;
+                showPage('login');
+            }
+        }
+
+        // --- Login ---
+        async function handleLogin(email, password) {
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('username-display').textContent = data.name;
+                    updateDropdown(true);
+                    isLoggedIn = true;
+                    showPage('home');
+                    document.getElementById('login-error').textContent = '';
+
+                    // Reload progress after login
+                    await loadProgress();
+                    return true;
+                } else {
+                    document.getElementById('login-error').textContent = data.error || 'Login failed';
+                    return false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-error').textContent = 'Login failed. Please try again.';
+                return false;
+            }
+        }
+
+        // --- Logout ---
+        async function logout() {
+            try {
+                // Use POST method for logout
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                document.getElementById('username-display').textContent = 'Guest User';
+                updateDropdown(false);
+                isLoggedIn = false;
+
+                // Reset progress page to show empty state
+                const progressList = document.getElementById('progress-list');
+                progressList.innerHTML = `
+                    <div class="no-results">
+                        <p>No tests taken yet. Complete the diabetes risk assessment to see your results here.</p>
+                        <button onclick="showPage('predict')">Take Test Now</button>
+                    </div>
+                `;
+
+                showPage('login');
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Even if fetch fails, clear local state
+                document.getElementById('username-display').textContent = 'Guest User';
+                updateDropdown(false);
+                isLoggedIn = false;
+                showPage('login');
+            }
+        }
+        // --- User Profile Dropdown Toggle ---
+        document.addEventListener('DOMContentLoaded', function () {
+            checkLoginStatus();
+
+            // Navigation items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    const navMap = {
+                        'home': 'home',
+                        'predict': 'predict',
+                        'health tips': 'tips',
+                        'progress': 'progress',
+                        'about us': 'about',
+                        'login': 'login',      // Add login
+                        'register': 'register' // Add register
+                    };
+                    const page = navMap[this.textContent.trim().toLowerCase()] || 'home';
+                    showPage(page, this);
+                });
+            });
+
+            // User profile dropdown
+            const userProfile = document.getElementById('user-profile');
+            const userDropdown = document.getElementById('user-dropdown');
+            userProfile.addEventListener('click', function (e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', function () {
+                userDropdown.classList.remove('show');
+            });
+
+            // Login form submit
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const email = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+                    handleLogin(email, password);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
