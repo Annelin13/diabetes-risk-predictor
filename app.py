@@ -36,14 +36,6 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-# Email setup
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
-
 # Debug: Print email configuration
 print("🔧 Email Configuration:")
 print(f"MAIL_SERVER: {app.config['MAIL_SERVER']}")
@@ -154,7 +146,7 @@ def send_welcome_email(user):
                 
                 <h3>🚀 Get Started Now:</h3>
                 <p>Take your first diabetes risk assessment to establish your baseline health profile.</p>
-                <a href="https://millesimally-graphological-chin.ngrok-free.dev" class="button" style="color: white !important;">Take Your First Test</a>
+                <a href="http://localhost:5000" class="button" style="color: white !important;">Take Your First Test</a>
                 
                 <h3>📅 Monthly Health Check:</h3>
                 <p>We'll remind you to take the test every month to track your health progress.</p>
@@ -229,7 +221,7 @@ def send_test_reminder_email(user, days_since_last_test):
                     <li>Early detection of concerning trends</li>
                 </ul>
                 
-                <a href="https://millesimally-graphological-chin.ngrok-free.dev" class="button" style="color: white !important;">Take Your Monthly Test Now</a>
+                <a href="http://localhost:5000" class="button" style="color: white !important;">Take Your Monthly Test Now</a>
                 
                 <p><em>This test takes only 2 minutes and could provide valuable insights into your health!</em></p>
                 
